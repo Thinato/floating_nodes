@@ -5,11 +5,9 @@ class Node:
 	def __init__(self, pos, direction, speed):
 		self.pos = pg.math.Vector2(pos)
 		self.dir = pg.math.Vector2(direction)
-		# self.c = initial_c
 		self.c = 255
 		self.c_inc = 0.2
 		self.speed = speed
-		# self.screen_size = screen_size
 
 
 	def update(self, screen, dt, speed_mult=1, size=3):
