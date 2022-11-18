@@ -5,14 +5,14 @@ import math
 import pygame_gui
 
 pg.freetype.init()
+pg.font.init()
 
 width, height = 800, 600
 screen = pg.display.set_mode((width, height), pg.RESIZABLE)
 manager = pygame_gui.UIManager((width, height))
 clock = pg.time.Clock()
 
-pg.font.init()
-
+# node variables
 nodes = []
 node_amount = 0
 node_range = 200
@@ -21,7 +21,9 @@ node_size = 3
 node_last_spdmult = node_speed_mult
 custom_color = (255,255,255)
 
+
 font = pg.font.SysFont('Lucida Console', 14)
+press_esc = font.render('Press \'ESC\' to open the setup menu.', True, (255,255,255))
 
 pause = False
 show_dist = True
@@ -35,15 +37,20 @@ for i in range(node_amount):
 		(random()-.5, random()-.5), # direction
 		randint(60,100))) # speed
 
-win_setup = pygame_gui.elements.UIWindow(rect=pg.Rect( (10,10), (270,500) ), manager=manager,
+win_setup = pygame_gui.elements.UIWindow(rect=pg.Rect( (10,10), (270,455) ), manager=manager,
 	window_display_title='[ESC] Setup' )
+
 
 # wtf that worked?
 def dont_kill():
 	win_setup.hide()
-
+# the window will not be killed if you close it pressing the X button
 win_setup.on_close_window_button_pressed = dont_kill
 # ¯\_(ツ)_/¯
+
+'''
+Loading all buttons, textboxes, sliders... using pygame_gui.
+'''
 
 lbl_node_amount = pygame_gui.elements.UILabel(relative_rect=pg.Rect( (10,10),(90,30) ),
 	manager=manager, container=win_setup, text='Node Amount')
@@ -89,13 +96,9 @@ drop_color = pygame_gui.elements.UIDropDownMenu(relative_rect=pg.Rect( (10,270),
 btn_pickcolor = pygame_gui.elements.UIButton(relative_rect=pg.Rect( (10,300), (220,30) ), 
 	text='Pick Color', manager=manager, container=win_setup)
 btn_pickcolor.disable()
-# print(drop_color.selected_option)
 
-btn_pause = pygame_gui.elements.UIButton(relative_rect=pg.Rect( (10,340), (220,30) ), 
+btn_pause = pygame_gui.elements.UIButton(relative_rect=pg.Rect( (10,360), (220,30) ), 
 	text='Pause', manager=manager, container=win_setup, tool_tip_text='Pause simulation')
-
-# btn_start = pygame_gui.elements.UIButton(relative_rect=pg.Rect( (125,210), (105,30) ), 
-# 	text='Start', manager=manager, container=win_setup, tool_tip_text='Start simulation')
 
 
 
@@ -129,6 +132,7 @@ while True:
 
 			elif event.key == pg.K_F1:
 				show_dist = not show_dist
+				# acts like a check box
 				if show_dist:
 					check_distances.set_text('[X] Show Distances')
 				else:
@@ -168,6 +172,8 @@ while True:
 					node_speed_mult = 0
 					btn_pause.set_text('Resume')
 			elif event.ui_element == btn_set:
+				if not txt_node_amount.get_text():
+					continue
 				node_amount = int(txt_node_amount.get_text())
 				nodes.clear()
 				for i in range(node_amount):
@@ -193,10 +199,7 @@ while True:
 					btn_pickcolor.disable()
 
 		manager.process_events(event)
-	# if pause:
-	# 	continue
 	screen.fill((0,0,0))
-
 
 	for node1 in nodes:
 		dist = 0
@@ -231,6 +234,10 @@ while True:
 	for node in nodes:
 		node.update(screen, dt, node_speed_mult, node_size)
 
+	# this will show the message 'press esc to show menu'
+	# show_dist is used just so you can have a clean screen
+	if not win_setup.visible and show_dist:
+		screen.blit(press_esc, (3,3))
 	manager.update(dt)
 	manager.draw_ui(screen)
 	pg.display.update()
